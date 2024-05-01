@@ -1,0 +1,7 @@
+Flask==3.0.2
+redis
+requests
+hotqueue
+
+pandas
+
