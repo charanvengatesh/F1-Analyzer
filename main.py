@@ -8,7 +8,7 @@ import json
 import csv
 from flask import Flask, request, send_file
 import redis
-
+from jobs import add_job, get_job_by_id, update_job_status, get_jids, delete_jdb, results
 
 app = Flask(__name__)
 
@@ -169,6 +169,7 @@ def calc_driver_summary(driver):
 
     for entry in drivers_data:
         name=entry['forename']+'-'+entry['surname']
+        name=name.replace(' ', '-')
         if name==driver:
             ret_dict['forename']=entry['forename']
             ret_dict['surname']=entry['surname']
@@ -182,6 +183,84 @@ def calc_driver_summary(driver):
             ret_dict['races']=races
             return(ret_dict)
     return "inputted driver name not found in databse."
+
+
+
+@app.route('/jobs', methods=['POST', 'GET', 'DELETE'])
+def jobs_id()->list:
+
+    """
+    Initializes and returns a Redis client connected to a specified Redis database.
+    """
+    if request.method=='POST':
+        inputs = request.get_json()
+        start_year=0
+        end_year=0
+
+        #setting default values to zero which will mean all years are considered
+        
+
+        try:
+            start_year = int(inputs["start_year"])
+            end_year= int(inputs["end_year"])
+            driver_name=inputs["driver"]
+        except(TypeError):
+            return("Please input an integer for the start and end years.\n")
+
+        add_job(driver_name, start_year, end_year, status="submitted")
+        return("The job has been submitted. Perform a get request to get all active job id's\n")
+    if request.method=='GET':
+        if len(get_jids())<5:
+            return("No current jobs. Use a post request to create new jobs.\n")
+        else:
+            jid_string=get_jids()[3:-2]
+            jid_list=jid_string.split("', b'")
+            return(jid_list)
+
+    if request.method=='DELETE':
+        delete_jdb()
+        return("Jobs Deleted.")
+
+
+@app.route('/jobs/<jobid>', methods=['GET'])
+def get_job_from_id(jobid)->dict:
+
+    """
+    Route to manage job submissions and queries about jobs related to genomic data processing.
+    Supports POST, GET, and DELETE methods.
+
+    - POST: Submits a new job with a specified chromosome number.
+    - GET: Retrieves a list of job IDs. If fewer than 5 jobs are present, prompts to submit more jobs.
+    - DELETE: Clears all jobs from the job database.
+    """
+
+    try:
+        job_dict=get_job_by_id(jobid)
+        return(job_dict)
+    except:
+         return("Specified ID not found in jobs.\n")
+
+
+
+
+@app.route('/download/<jobid>', methods=['GET'])
+def download(jobid)->dict:
+
+    """
+    Route to retrieve information about a specific job using its job ID.
+    Supports only the GET method.
+
+    - GET: Returns details of a job if the specified job ID is found. If not found, returns an error message.
+    """
+
+    path = f'/app/{jobid}.png'
+    with open(path, 'wb') as f:
+        f.write(results.hget(jobid, 'image'))   # 'results' is a client to the results db
+    return send_file(path, mimetype='image/png', as_attachment=True)
+
+
+
+
 
 
 

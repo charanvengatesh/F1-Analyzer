@@ -3,5 +3,6 @@ redis
 requests
 hotqueue
 
+matplotlib
 pandas
 
