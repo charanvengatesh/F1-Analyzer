@@ -63,7 +63,7 @@ def get_data()->list:
         df = pd.read_csv(zf.open(file_name))
 
         # 6: convert the dataframe to a JSON object.
-        driver_standings_data = df.to_json(orient="records")
+        driver_standings_data=json.loads(json.dumps(list(df.T.to_dict().values())))
 
 
         # 5: Reading the CSV from the zip file and converting it to a dataframe.
@@ -72,8 +72,10 @@ def get_data()->list:
 
 
         # 6: convert the dataframe to a JSON object.
-        drivers_data = df.to_json(orient="records")
+        drivers_data=json.loads(json.dumps(list(df.T.to_dict().values())))
+
         
+    
 
 
         # 5: Reading the CSV from the zip file and converting it to a dataframe.
@@ -81,16 +83,23 @@ def get_data()->list:
         df = pd.read_csv(zf.open(file_name))
 
         # 6: convert the dataframe to a JSON object.
-        results_data = df.to_json(orient="records")
+        results_data=json.loads(json.dumps(list(df.T.to_dict().values())))
 
 
 
+        # 5: Reading the CSV from the zip file and converting it to a dataframe.
+        file_name = "races.csv"
+        df = pd.read_csv(zf.open(file_name))
 
+        # 6: convert the dataframe to a JSON object.
+        races_data=json.loads(json.dumps(list(df.T.to_dict().values())))
 
         
         driver_standings_data=json.dumps(driver_standings_data)
         drivers_data=json.dumps(drivers_data)
         results_data=json.dumps(results_data)
+        races_data=json.dumps(races_data)
+
 
         drivers_data=drivers_data.replace('\\', '')
 
@@ -98,7 +107,7 @@ def get_data()->list:
         rdb.set('driver_standings_data', driver_standings_data)
         rdb.set('drivers_data', drivers_data)
         rdb.set('results_data', results_data)
-
+        rdb.set('races_data', races_data)
         return("Data has been posted to redis.\n")
     
     if request.method=='GET':
@@ -127,11 +136,8 @@ def driver_list():
 
     rdb=get_redis_client()
     drivers_data=rdb.get('drivers_data')
-    return str(type(drivers_data))
-    try:
 
-        if(drivers_data[0]==" "):
-            drivers_data=drivers_data[1:]       #This is because I was getting an error where there was a space at the start of the data string that caused an error with json.loads
+    try:
         drivers_data=json.loads(drivers_data)
     except TypeError:
         return("Database empty. Submit a post request before trying to access data.\n")
@@ -143,17 +149,17 @@ def driver_list():
         drivers_list.append(name_str)
     return(drivers_list)
 
-@app.route('/driverinfo/<driver>', methods=['GET'])
+@app.route('/drivers/<driver>', methods=['GET'])
 def calc_driver_summary(driver):
     wins=0
     races=0
-    nationality=''
-
     rdb=get_redis_client()
 
 
     drivers_data=rdb.get('drivers_data')
     driver_standings_data=rdb.get('driver_standings_data')
+
+    ret_dict={}
 
     try:
         drivers_data=json.loads(drivers_data)
@@ -161,15 +167,21 @@ def calc_driver_summary(driver):
     except TypeError:
         return("Database empty. Submit a post request before trying to access data.\n")
 
-    for entry in drivers_data['drivers']:
-        if entry['driverRef']==driver:
+    for entry in drivers_data:
+        name=entry['forename']+'-'+entry['surname']
+        if name==driver:
+            ret_dict['forename']=entry['forename']
+            ret_dict['surname']=entry['surname']
+            ret_dict['dob']=entry['dob']
+            ret_dict['nationality']=entry['nationality']
             driverId=entry['driverId']
-            nationality=entry['nationality']
-    for entry in driver_standings_data['driver_standings']:
-        if entry['driverId']==driverId:
-            races+=1
-            wins=wins+entry['wins']
-    return(races, wins, nationality)
+    
+            for entry2 in driver_standings_data:
+                if entry2['driverId']==driverId:
+                    races+=1
+            ret_dict['races']=races
+            return(ret_dict)
+    return "inputted driver name not found in databse."
 
 
 

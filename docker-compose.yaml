@@ -21,3 +21,13 @@ services:
         ports:
             - 5000:5000
         command: ["python3", "app.py"]
+   worker:
+      build:
+          context: ./
+          dockerfile: ./Dockerfile
+      depends_on:
+            - redis-db
+      image: dylmcintyre/final_api:1.0
+      environment:
+            - REDIS_IP=redis-db
+      command: ["python3", "worker.py"]
