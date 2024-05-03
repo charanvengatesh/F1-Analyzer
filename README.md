@@ -30,25 +30,61 @@ To run this project using Docker, follow these steps:
 
 ## Routes
 
-curl localhost:5000/data -X POST
-curl localhost:5000/data -X GET
-curl localhost:5000/data -X DELETE
+# Below is example of different API routes and their output:
 
+/data
+
+  curl localhost:5000/data -X POST
+
+  Posts F1 data to the redis database
+  
+  
+  curl localhost:5000/data -X GET
+
+  Returns the current database data
+  
+  
+  curl localhost:5000/data -X DELETE
+
+  Clears the current database data
+
+
+
+/drivers
 
 curl localhost:5000/drivers
 
-curl localhost:5000/drivers/<driver_name>
+Returns a list of all driver names within the database
 
+curl localhost:5000/drivers/<firstname-lastname>
+
+Returns a dictionary of information about a given driver including their nationality, number of races, and date of birth
   #Note: Please input driver names with a dash between first and last name ex: Lewis-Hamilton
 
 
 curl localhost:5000/jobs  -X POST -d '{"driver":"Lewis-Hamilton", "start_year":"2000", "end_year":"2020"}' -H 'Content-Type: application/json'
 
+This is an example request for a job post. The above request will generate a job to create a bar graph of championship points scored by Lewis Hamilton within the start and end year range. To request a job with no designated start and end date, put 0 as the start and end years as so:
+
+curl localhost:5000/jobs  -X POST -d '{"driver":"Lewis-Hamilton", "start_year":"2000", "end_year":"2020"}' -H 'Content-Type: application/json'
+
+
+
 curl localhost:5000/jobs -X DELETE
+
+Deletes all current jobs on the database
+
 
 curl localhost:5000/jobs -X GET
 
+Gets the job ID for all current jobs
+
+
 curl localhost:5000/jobs/<jobId>
+
+This will return the status of the job for the requested job ID along with the inputed parameters of the job
+
+
 
 
 curl localhost:5000/download/<jobId> --output output.png
