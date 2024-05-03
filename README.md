@@ -28,3 +28,22 @@ To run this project using Docker, follow these steps:
 2. Navigate to the root directory of the cloned repository.
 3. Create a Dockerfile in the root directory
 
+## Routes
+
+curl localhost:5000/data -X POST
+curl localhost:5000/data -X GET
+curl localhost:5000/data -X DELETE
+
+curl localhost:5000/drivers
+curl localhost:5000/drivers/<driver_name>
+  #Note: Please input driver names with a dash between first and last name ex: Lewis-Hamilton
+
+
+curl localhost:5000/jobs  -X POST -d '{"driver":"Lewis-Hamilton", "start_year":"2000", "end_year":"2020"}' -H 'Content-Type: application/json'
+curl localhost:5000/jobs -X DELETE
+curl localhost:5000/jobs -X GET
+
+curl localhost:5000/jobs/<jobId>
+
+curl localhost:5000/download/<jobId> --output output.png
+
