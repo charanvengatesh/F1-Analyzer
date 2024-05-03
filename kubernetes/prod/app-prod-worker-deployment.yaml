@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-prod
+  template:
+    metadata:
+      labels:
+        app: worker-prod
+    spec:
+      containers:
+      - name: worker-prod
+        image: your-worker-image:tag
+
