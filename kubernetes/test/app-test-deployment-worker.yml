@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: worker-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: worker-test
+  template:
+    metadata:
+      labels:
+        app: worker-test
+    spec:
+      containers:
+      - name: worker-test
+        image: your-worker-image:tag
+
