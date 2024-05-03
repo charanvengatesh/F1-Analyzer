@@ -5,29 +5,20 @@ services:
         image: redis:7
         ports:
             - 6379:6379
-        volumes:
-            - ./data:/data
-        user: "1000:1000"
         command: ["--save", "1", "1"]
     flask-app:
-        build:
-            context: ./
-            dockerfile: ./Dockerfile
+        build: .
         depends_on:
             - redis-db
-        image: dylmcintyre/final_api:1.0
         environment:
             - REDIS_IP=redis-db
         ports:
-            - 5000:5000
+            - 3000:3000
         command: ["python3", "app.py"]
-   worker:
-      build:
-          context: ./
-          dockerfile: ./Dockerfile
-      depends_on:
+    worker:
+        build: .
+        depends_on:
             - redis-db
-      image: dylmcintyre/final_api:1.0
-      environment:
+        environment:
             - REDIS_IP=redis-db
-      command: ["python3", "worker.py"]
+        command: ["python3", "worker.py"]
