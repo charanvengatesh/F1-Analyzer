@@ -33,7 +33,13 @@ def do_work(jobid):
     start_year = current_job['start_year'] or 0
     end_year = current_job['end_year'] or 3000
 
-    driverId = next((e['driverId'] for e in drivers_data if f"{e['forename']}-{e['surname']}" == current_job['driver']), -1)
+    driverId=-1
+    for entry in drivers_data:
+        name_check=entry['forename']+' '+entry['surname']
+        name_check=name_check.replace(' ', '-')
+        if current_job['driver']==name_check:
+            driverId=entry['driverId']
+
     if driverId == -1:
         update_job_status(jobid, 'complete')
         logger.warning(f"Driver {current_job['driver']} not found in data.")
@@ -41,16 +47,18 @@ def do_work(jobid):
 
     hashmap = {}
     for entry in driver_standings_data:
+        yearfound=False
         race_Id = entry['raceId']
-        race_year = next((e['year'] for e in races_data if e['raceId'] == race_Id), None)
 
-        if driverId==entry['driverId']:
-            
-            if race_year in hashmap:
+        for entry2 in races_data:
+            if entry2['raceId']== race_Id:
+                race_year = entry2['year']
+                yearfound=True
+        if yearfound:
+            if race_year in hashmap.keys():
                 hashmap[race_year] += int(entry['points'])
             else:
                 hashmap[race_year] = int(entry['points'])
-                
 
     groups, numbs = zip(*hashmap.items())
 
