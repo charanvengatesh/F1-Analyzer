@@ -199,4 +199,33 @@ def download(jobid):
         return send_file(path, mimetype='image/png', as_attachment=True)
 
 
+@app.route('/help', methods=['GET'])
+def help():
+    help_message = """
+    Welcome to the Formula 1 Race Data Analysis API Help Page!
+
+    Available Endpoints:
+
+    1. GET /help - Display this help message.
+    2. POST /data - Fetch and process Formula 1 race data from Kaggle. No input required.
+    3. GET /data - Retrieve Formula 1 race data stored in Redis. No input required.
+    4. DELETE /data - Delete Formula 1 race data stored in Redis. No input required.
+
+    5. GET /drivers - Get a list of all drivers. No input required.
+    6. GET /drivers/<driver_name> - Get summary information for a specific driver. Input: driver_name (with a dash between first and last name, e.g., Lewis-Hamilton).
+
+    7. POST /jobs - Submit a job for analysis. Input: {"driver": "driver_name", "start_year": "start_year", "end_year": "end_year"} (e.g., {"driver": "Lewis-Hamilton", "start_year": "2000", "end_year": "2020"}).
+    8. GET /jobs - Get a list of active job IDs. No input required.
+    9. DELETE /jobs - Delete all jobs. No input required.
+    10. GET /jobs/<jobId> - Get details of a specific job. Input: jobId.
+    
+    11. GET /download/<jobId> - Download the image generated for a job. Input: jobId.
+
+    Base URL: http://0.0.0.0:3000/
+
+    """
+    return help_message
+
+
+
 app.run(debug=True, host='0.0.0.0', port=3000)
