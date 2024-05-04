@@ -44,7 +44,7 @@ def do_work(jobid):
         race_Id = entry['raceId']
         race_year = next((e['year'] for e in races_data if e['raceId'] == race_Id), None)
 
-        if driverId == entry['driverId']:
+        if driverId == entry['driverId'] and (int(race_year)>int(start_year)-1 and int(race_year)<int(end_year)+1):
 
             if race_year in hashmap:
                 hashmap[race_year] += int(entry['points'])
